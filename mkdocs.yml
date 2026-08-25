@@ -21,9 +21,25 @@ theme:
     - navigation.instant
     - navigation.top
     - content.code.copy
+    - navigation.expand
 
 nav:
   - Home: index.md
+  - Getting started: getting-started.md
+  - Guides:
+      - Stations: guides/stations.md
+      - Devices: guides/devices.md
+      - Control commands: guides/control.md
+      - Streaming telemetry: guides/streaming.md
+      - Configuration and strategies: guides/config-strategies.md
+  - API reference:
+      - DeyeCloud: api/deyecloud.md
+      - Helpers: api/helpers.md
+      - Station: api/station.md
+      - Device: api/device.md
+      - Order: api/order.md
+      - Supporting classes: api/supporting.md
+      - Exceptions: api/exceptions.md
 
 markdown_extensions:
   - admonition
@@ -33,6 +49,17 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.inlinehilite
   - pymdownx.snippets
+  - toc:
+      permalink: true
 
 plugins:
   - search
+  - autorefs
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            show_signature: true
+            show_signature_annotations: true
+            docstring_style: sphinx
