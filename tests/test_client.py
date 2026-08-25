@@ -330,6 +330,20 @@ class TestDevice:
 
 
 class TestOrder:
+    def test_battery_parameter_payload(self):
+        deye, requestor = make_deyecloud(
+            {
+                "v1.0/account/token": TOKEN,
+                "v1.0/order/battery/parameter/update": envelope(
+                    {"orderId": "123", "collectionTime": 1700000000, "connectionStatus": 1}
+                ),
+            }
+        )
+        order = deye.order.battery_parameter(device_sn="2505135714", parameter="BATT_LOW", value=20)
+        assert order.order_id == "123"
+        body = requestor.calls[-1]["json"]
+        assert body == {"deviceSn": "2505135714", "paramterType": "BATT_LOW", "value": 20}
+
     def test_work_mode_returns_order(self):
         deye, _ = make_deyecloud(
             {

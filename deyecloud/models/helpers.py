@@ -541,12 +541,12 @@ class OrderHelper(DeyeBase):
 
         :param device_sn: The serial number of the device.
         :param parameter: One of ``"MAX_CHARGE_CURRENT"``, ``"MAX_DISCHARGE_CURRENT"``,
-            ``"GRID_CHARGE_AMPERE"``, or ``"BATT_LOW"``.
+            ``"GRID_CHARGE_AMPERE"``, or ``"BATT_LOW"`` (minimum battery SOC).
         :param value: The new value of the parameter.
 
         """
         _validate(parameter, "parameter", BATTERY_PARAMETERS)
-        body = {"deviceSn": device_sn, "param": parameter, "value": value}
+        body = {"deviceSn": device_sn, "paramterType": parameter, "value": value}
         return self._deyecloud.post(API_PATH["order_battery_parameter"], json=body)
 
     def battery_type(self, *, device_sn: str, battery_type: str) -> Order:
