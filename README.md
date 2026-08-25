@@ -11,6 +11,14 @@ strategies.
 
 ## Install
 
+From PyPI:
+
+```bash
+pip install deyecloud
+```
+
+For development, install in editable mode with test dependencies:
+
 ```bash
 pip install -e ".[test]"
 ```
