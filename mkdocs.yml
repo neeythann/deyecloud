@@ -1,0 +1,38 @@
+site_name: deyecloud
+site_description: A Python wrapper for the Deye Cloud API, modeled after PRAW.
+site_url: https://deyecloud.readthedocs.io/
+repo_url: https://github.com/neeythann/deyecloud
+repo_name: neeythann/deyecloud
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.top
+    - content.code.copy
+
+nav:
+  - Home: index.md
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+
+plugins:
+  - search
