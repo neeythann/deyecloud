@@ -72,7 +72,7 @@ class Station(DeyeModelBase):
             print(station.battery_soc)
 
         """
-        return self._deyecloud.station.latest([self.station_id])
+        return self._deyecloud.station.latest(self.station_id)
 
     def history(
         self,

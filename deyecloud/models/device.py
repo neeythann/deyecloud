@@ -67,7 +67,7 @@ class Device(DeyeModelBase):
         :param device_type: An optional device type used to disambiguate (default: ``None``).
 
         """
-        return self._deyecloud.device.latest([self.device_sn], device_type=device_type)
+        return self._deyecloud.device.latest(self.device_sn, device_type=device_type)
 
     def history(
         self,
