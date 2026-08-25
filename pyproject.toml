@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "deyecloud"
+version = "0.1.0"
+description = "A Python wrapper for the Deye Cloud API, modeled after PRAW."
+readme = "README.md"
+license = { text = "GPL-3.0-or-later" }
+requires-python = ">=3.9"
+authors = [{ name = "Nathan Xavier Golez" }]
+keywords = ["deye", "inverter", "solar", "ess", "api", "wrapper"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = ["requests>=2.25"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[tool.setuptools.packages.find]
+include = ["deyecloud*"]
+
+[tool.setuptools.package-data]
+deyecloud = ["deye.ini"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
