@@ -328,3 +328,95 @@ class TestStrategy:
         )
         order = deye.strategy.read(device_sn="12583SS")
         assert order.order_id == "9"
+
+
+class TestStream:
+    def _stream_deye(self, snapshots):
+        from deyecloud.models import Station
+
+        queue = list(reversed(snapshots))
+        deye, _ = make_deyecloud({"v1.0/account/token": TOKEN})
+        station = Station(deye, _data={"station_id": 322})
+        original = deyecloud.DeyeCloud.request
+
+        def fake_request(*, method="", path="", **kwargs):
+            if path == "v1.0/station/latest":
+                return {"dataList": [queue.pop()]}
+            return original(self, method=method, path=path, **kwargs)
+
+        deye.request = fake_request  # type: ignore[method-assign]
+        return station
+
+    def test_station_stream_yields_snapshots(self):
+        snapshots = [
+            {"stationId": 322, "stationName": "Home", "lastUpdateTime": 1, "generationPower": 100},
+            {"stationId": 322, "stationName": "Home", "lastUpdateTime": 2, "generationPower": 200},
+            {"stationId": 322, "stationName": "Home", "lastUpdateTime": 3, "generationPower": 300},
+        ]
+        station = self._stream_deye(snapshots)
+
+        import itertools
+
+        yielded = list(itertools.islice(station.stream.latest(), 3))
+        assert [item.generation_power for item in yielded] == [100, 200, 300]
+
+    def test_station_stream_skip_existing(self):
+        snapshots = [
+            {"stationId": 322, "stationName": "Home", "lastUpdateTime": 1, "generationPower": 100},
+            {"stationId": 322, "stationName": "Home", "lastUpdateTime": 2, "generationPower": 200},
+        ]
+        station = self._stream_deye(snapshots)
+
+        import itertools
+
+        yielded = list(itertools.islice(station.stream.latest(skip_existing=True), 1))
+        assert len(yielded) == 1
+        assert yielded[0].generation_power == 200
+
+
+class TestStreamGenerator:
+    def test_dedupes_by_attribute(self):
+        from types import SimpleNamespace
+
+        from deyecloud.models import stream_generator
+
+        responses = [[1], [1, 2], [2, 3]]
+
+        class _Stop(Exception):
+            pass
+
+        def fake(**kwargs):
+            if not responses:
+                raise _Stop
+            return [SimpleNamespace(collection_time=value) for value in responses.pop(0)]
+
+        yielded = []
+        try:
+            for item in stream_generator(fake):
+                yielded.append(item.collection_time)
+        except _Stop:
+            pass
+        assert yielded == [1, 2, 3]
+
+    def test_skip_existing(self):
+        from types import SimpleNamespace
+
+        from deyecloud.models import stream_generator
+
+        responses = [[1], [2]]
+
+        class _Stop(Exception):
+            pass
+
+        def fake(**kwargs):
+            if not responses:
+                raise _Stop
+            return [SimpleNamespace(collection_time=value) for value in responses.pop(0)]
+
+        yielded = []
+        try:
+            for item in stream_generator(fake, skip_existing=True):
+                yielded.append(item.collection_time)
+        except _Stop:
+            pass
+        assert yielded == [2]

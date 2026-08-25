@@ -8,6 +8,7 @@ from deyecloud.const import DEVICE_HISTORY_GRANULARITY
 from deyecloud.endpoints import API_PATH
 from deyecloud.exceptions import InvalidParameterValue
 from deyecloud.models.base import DeyeModelBase
+from deyecloud.util.cache import cachedproperty
 from deyecloud.util.snake import snake_case_keys
 
 if TYPE_CHECKING:
@@ -68,6 +69,24 @@ class Device(DeyeModelBase):
 
         """
         return self._deyecloud.device.latest(self.device_sn, device_type=device_type)
+
+    @cachedproperty
+    def stream(self) -> DeviceStream:
+        """Provide an instance of :class:`.DeviceStream`.
+
+        Streams can be used to indefinitely retrieve live device telemetry as it is
+        updated, like:
+
+        .. code-block:: python
+
+            device = deye.device("12583SS")
+            for snapshot in device.stream.latest():
+                print(snapshot.device_state)
+
+        """
+        from deyecloud.models.stream import DeviceStream  # ruff:ignore[import-outside-top-level]
+
+        return DeviceStream(self)
 
     def history(
         self,

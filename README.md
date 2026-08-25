@@ -111,6 +111,42 @@ order = deye.strategy.read(device_sn="...")
 result = deye.strategy.read_result(order.order_id)
 ```
 
+### Streaming telemetry
+
+The Deye Cloud API is pull-based, so streams poll the latest telemetry and yield a
+snapshot whenever a new sample arrives (identified by its timestamp). This mirrors
+PRAW's stream pattern, including exponential backoff, `skip_existing`, `pause_after`,
+and `exception_handler`.
+
+```python
+# Monitor a station's live telemetry
+station = deye.station(322)
+for snapshot in station.stream.latest():
+    print(snapshot.generation_power, snapshot.battery_soc)
+
+# Only report changes after the stream is created
+for snapshot in station.stream.latest(skip_existing=True):
+    print(snapshot.last_update_time)
+
+# Stop after 6 polls with no change, then break
+for snapshot in station.stream.latest(pause_after=6):
+    if snapshot is None:
+        break
+    print(snapshot.generation_power)
+
+# Keep the stream alive across transient errors
+def log_exception(exception):
+    print(f"Stream error, retrying: {exception}")
+
+for snapshot in station.stream.latest(exception_handler=log_exception):
+    print(snapshot.generation_power)
+
+# Devices work the same way
+device = deye.device("12583SS")
+for snapshot in device.stream.latest():
+    print(snapshot.device_state)
+```
+
 ## Architecture
 
 The layout intentionally mirrors PRAW:
@@ -136,6 +172,10 @@ The layout intentionally mirrors PRAW:
   PRAW's `RedditBase`.
 - **Pagination** — list endpoints use a `PageGenerator` that transparently requests
   successive pages.
+- **Streaming** — `station.stream.latest()` / `device.stream.latest()` poll the latest
+  telemetry and yield new snapshots as they arrive, mirroring PRAW's
+  `stream_generator` (exponential backoff, dedup, `skip_existing`, `pause_after`,
+  `exception_handler`).
 - **Snake case** — response keys are normalized from camelCase to snake_case, so
   `batterySOC` becomes `station.battery_soc`.
 

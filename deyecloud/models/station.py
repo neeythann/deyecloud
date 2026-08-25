@@ -8,6 +8,7 @@ from deyecloud.const import STATION_HISTORY_GRANULARITY
 from deyecloud.endpoints import API_PATH
 from deyecloud.exceptions import InvalidParameterValue
 from deyecloud.models.base import DeyeModelBase
+from deyecloud.util.cache import cachedproperty
 from deyecloud.util.snake import snake_case_keys
 
 if TYPE_CHECKING:
@@ -73,6 +74,24 @@ class Station(DeyeModelBase):
 
         """
         return self._deyecloud.station.latest(self.station_id)
+
+    @cachedproperty
+    def stream(self) -> StationStream:
+        """Provide an instance of :class:`.StationStream`.
+
+        Streams can be used to indefinitely retrieve live station telemetry as it is
+        updated, like:
+
+        .. code-block:: python
+
+            station = deye.station(322)
+            for snapshot in station.stream.latest():
+                print(snapshot.generation_power)
+
+        """
+        from deyecloud.models.stream import StationStream  # ruff:ignore[import-outside-top-level]
+
+        return StationStream(self)
 
     def history(
         self,
