@@ -60,7 +60,7 @@ class Station(DeyeModelBase):
         self._fetched = True
 
     def _fetch_info(self) -> tuple[str, dict[str, Any], dict[str, Any]]:
-        return ("station_latest", {}, {"stationIds": [self.station_id]})
+        return ("station_latest", {}, {"stationId": self.station_id})
 
     def latest(self) -> Station:
         """Return a :class:`.Station` instance with the latest telemetry.
@@ -169,7 +169,7 @@ class Station(DeyeModelBase):
         :param page_size: The number of devices requested per page (default: ``20``).
 
         """
-        body = {"stationId": self.station_id}
+        body = {"stationIds": [self.station_id]}
         if device_type:
             body["deviceType"] = device_type
         return self._deyecloud._paginate(path="v1.0/station/device", json=body, limit=limit, page_size=page_size)

@@ -42,10 +42,27 @@ class Page(DeyeBase):
         self.page = getattr(self, "page", 1)
         self.size = getattr(self, "size", len(self.records))
         self.total = getattr(self, "total", None)
+        if self.total is None:
+            self.total = getattr(self, "station_total", None)
 
     @staticmethod
     def _extract_records(data: dict[str, Any]) -> list[Any]:
-        for key in ("records", "recordList", "record_list", "dataList", "data_list", "list"):
+        for key in (
+            "records",
+            "recordList",
+            "record_list",
+            "stationList",
+            "station_list",
+            "deviceDataList",
+            "device_data_list",
+            "deviceListItems",
+            "device_list_items",
+            "stationDataItems",
+            "station_data_items",
+            "dataList",
+            "data_list",
+            "list",
+        ):
             value = data.get(key)
             if isinstance(value, list):
                 return value
@@ -135,12 +152,38 @@ class PageGenerator(DeyeBase, Iterator):
 
         self._page += 1
         body = {**self._json, "page": self._page, "size": self.page_size}
-        page = self._deyecloud.post(self._path, params=self._params, json=body)
-        self._records = list(page) if isinstance(page, Page) else []
-        self.total = page.total if isinstance(page, Page) else None
+        data = self._deyecloud.request(method="POST", path=self._path, params=self._params, json=body)
+        if not isinstance(data, dict):
+            self._records = []
+        else:
+            records = self._extract_records(data)
+            objectified = self._deyecloud._objector.objectify(data=records)
+            if not isinstance(objectified, list):
+                objectified = [objectified] if objectified is not None else []
+            self._records = objectified
+            self.total = data.get("total")
+            if self.total is None:
+                self.total = data.get("stationTotal")
         self._index = 0
 
         if not self._records:
             self._exhausted = True
         elif self.total is not None and self.yielded + len(self._records) >= self.total:
             self._exhausted = True
+
+    @staticmethod
+    def _extract_records(data: dict[str, Any]) -> list[Any]:
+        for key in (
+            "records",
+            "recordList",
+            "stationList",
+            "deviceDataList",
+            "deviceListItems",
+            "stationDataItems",
+            "orgInfoList",
+            "dataList",
+        ):
+            value = data.get(key)
+            if isinstance(value, list):
+                return value
+        return []

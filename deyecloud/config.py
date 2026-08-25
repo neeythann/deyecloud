@@ -133,7 +133,10 @@ class Config:
             "password",
             "username",
         ):
-            setattr(self, attribute, self._fetch_or_not_set(attribute))
+            value = self._fetch_or_not_set(attribute)
+            if value is self.CONFIG_NOT_SET:
+                value = None
+            setattr(self, attribute, value)
 
         self.base_url = self._fetch_default("base_url", default=DEFAULT_BASE_URL)
         self.timeout = int(self._fetch_default("timeout", default=30))

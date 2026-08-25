@@ -74,9 +74,11 @@ class TestConfig:
 
 
 class TestParseResponse:
-    def test_success_returns_data(self):
+    def test_success_returns_full_body(self):
         response = make_response(envelope({"foo": "bar"}))
-        assert _parse_response(response) == {"foo": "bar"}
+        body = _parse_response(response)
+        assert body["foo"] == "bar"
+        assert body["success"] is True
 
     def test_business_error_raises(self):
         response = make_response(
@@ -166,24 +168,30 @@ class TestObjector:
         assert len(result) == 1
         assert result[0].device_sn == "x"
 
-    def test_page(self):
+    def test_container_unwrap(self):
         result = self._objector().objectify(
             data={
-                "page": 1,
-                "size": 20,
                 "total": 2,
-                "records": [
-                    {"stationId": 1, "stationName": "A"},
-                    {"stationId": 2, "stationName": "B"},
+                "stationList": [
+                    {"id": 1, "name": "A", "batterySOC": 10},
+                    {"id": 2, "name": "B", "batterySOC": 20},
                 ],
             }
         )
-        from deyecloud.models import Page, Station
+        from deyecloud.models import Station
 
-        assert isinstance(result, Page)
-        assert result.total == 2
-        assert all(isinstance(record, Station) for record in result.records)
-        assert result.records[0].station_id == 1
+        assert isinstance(result, list)
+        assert len(result) == 2
+        assert all(isinstance(item, Station) for item in result)
+        assert result[0].station_id == 1
+        assert result[1].station_name == "B"
+
+    def test_measure_points_not_device(self):
+        result = self._objector().objectify(
+            data={"deviceSn": "x", "measurePoints": ["SOC", "TotalChargeEnergy"]}
+        )
+        assert isinstance(result, dict)
+        assert result["measurePoints"] == ["SOC", "TotalChargeEnergy"]
 
     def test_plain_dict_passthrough(self):
         result = self._objector().objectify(data={"foo": 1})

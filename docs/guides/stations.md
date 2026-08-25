@@ -20,15 +20,11 @@ stations = list(deye.station.list(limit=5))
 
 ## Latest telemetry
 
-Fetch the latest data for one or more stations (max 10 per request):
+Fetch the latest telemetry for a station:
 
 ```python
-# A single station
 station = deye.station.latest(322)
 print(station.generation_power, station.battery_soc)
-
-# Several stations at once
-stations = deye.station.latest([322, 323])
 ```
 
 ## Lazy instances

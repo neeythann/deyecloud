@@ -47,8 +47,9 @@ Credentials may instead come from a `deye.ini` file (see
 for station in deye.station.list():
     print(station.station_id, station.station_name, station.battery_soc)
 
-# Latest telemetry for specific stations
-stations = deye.station.latest([322, 323])
+# Latest telemetry for a specific station
+station = deye.station.latest(322)
+print(station.generation_power, station.battery_soc)
 
 # Lazy instance: data is fetched from station/latest on first attribute access
 station = deye.station(322)
@@ -179,13 +180,18 @@ The layout intentionally mirrors PRAW:
 - **Snake case** — response keys are normalized from camelCase to snake_case, so
   `batterySOC` becomes `station.battery_soc`.
 
-## Notes / assumptions
+## Notes
 
-The pagination envelopes are assumed to use `page` / `size` / `total` / `records`
-(a common Deye convention). Response container keys (`deviceDataList`, `dataList`, ...)
-are unwrapped heuristically. If a live response differs, adjust the container key
-handling in [`objector.py`](./deyecloud/objector.py) and
-[`models/listing.py`](./deyecloud/models/listing.py).
+- **Response shape** — the Deye Cloud API places payload fields at the top level of the
+  response envelope (alongside `requestId` / `success` / `code` / `msg`); there is no
+  `data` wrapper. List endpoints wrap items in a container key (`stationList`,
+  `deviceDataList`, `deviceListItems`, `stationDataItems`, `orgInfoList`) and expose a
+  `total` (or `stationTotal`) count.
+- **Station keys** — station objects use `id` / `name`, which the client maps to
+  `station_id` / `station_name`.
+- **Permissions** — some endpoints (e.g. the read-only config and control commands)
+  require a business-member token; configure `company_id` (from `deye.account.info()`)
+  to obtain one.
 
 ## Tests
 

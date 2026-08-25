@@ -18,7 +18,6 @@ import requests
 from deyecloud.const import SUCCESS_CODE
 from deyecloud.exceptions import (
     DeyeCloudAPIException,
-    DeyeCloudErrorItem,
     InvalidToken,
     ResponseException,
 )
@@ -209,7 +208,9 @@ class DeyeCloudSession:
         :param json: JSON serializable object to send (default: ``None``).
         :param params: Query string parameters (default: ``None``).
 
-        :returns: The ``data`` field of the Deye Cloud response envelope.
+        :returns: The parsed response body (the Deye Cloud envelope fields such as
+            ``code`` / ``msg`` are removed only when they are absent; all other fields
+            are returned as-is at the top level).
 
         """
         token = self._authorizer.token()
@@ -223,6 +224,10 @@ class DeyeCloudSession:
 
 def _parse_response(response: requests.Response) -> Any:
     """Parse a raw HTTP response into the Deye Cloud business payload.
+
+    The Deye Cloud API places the payload fields at the top level of the response
+    envelope alongside ``requestId`` / ``success`` / ``code`` / ``msg``, so the full
+    body is returned on success.
 
     :raises: :class:`.ResponseException` on non-2xx status codes.
     :raises: :class:`.DeyeCloudAPIException` when the business envelope reports failure.
@@ -242,18 +247,10 @@ def _parse_response(response: requests.Response) -> Any:
 
     success = body.get("success")
     if success is False or (success is None and body.get("code") not in {None, SUCCESS_CODE}):
-        items: list[DeyeCloudErrorItem] = []
-        error_data = body.get("data")
-        if isinstance(error_data, list):
-            items = [
-                DeyeCloudErrorItem(code=str(item.get("code")) if isinstance(item, dict) else None)
-                for item in error_data
-            ]
         raise DeyeCloudAPIException(
             request_id=body.get("requestId"),
             code=body.get("code"),
             msg=body.get("msg"),
-            items=items,
         )
 
-    return body.get("data")
+    return body

@@ -21,8 +21,18 @@ def make_response(payload: Any, *, status: int = 200) -> requests.Response:
 
 
 def envelope(data: Any, *, success: bool = True, code: str = "1000000", msg: str = "success") -> dict[str, Any]:
-    """Build a standard Deye Cloud response envelope."""
-    return {"requestId": "req-1", "success": success, "code": code, "msg": msg, "data": data}
+    """Build a standard Deye Cloud response envelope.
+
+    The payload fields are placed at the top level of the envelope alongside the
+    ``requestId`` / ``success`` / ``code`` / ``msg`` fields, matching the live API.
+
+    """
+    if isinstance(data, dict):
+        body = dict(data)
+    else:
+        body = {}
+    body.update({"requestId": "req-1", "success": success, "code": code, "msg": msg})
+    return body
 
 
 class FakeRequestor(DeyeCloudRequestor):

@@ -28,6 +28,7 @@ from deyecloud.models.device import Device
 from deyecloud.models.listing import PageGenerator
 from deyecloud.models.order import Order
 from deyecloud.models.station import Station
+from deyecloud.util.snake import snake_case_keys
 
 if TYPE_CHECKING:
     import deyecloud
@@ -142,23 +143,26 @@ class StationHelper(DeyeBase):
             page_size=page_size,
         )
 
-    def latest(self, station_ids: list[int] | int) -> Any:
-        """Fetch the latest data for one or more stations.
+    def latest(self, station_id: int) -> Station:
+        """Fetch the latest telemetry for a single station.
 
-        :param station_ids: A station id or a list of up to 10 station ids.
+        :param station_id: The numeric identifier of the station.
 
-        :returns: A :class:`.Station` instance (when a single id is given), or a list
-            of :class:`.Station` instances.
+        :returns: A :class:`.Station` instance carrying the latest telemetry.
+
+        Example usage:
+
+        .. code-block:: python
+
+            station = deye.station.latest(322)
+            print(station.generation_power)
 
         """
-        ids = _as_list(station_ids)
-        if len(ids) > 10:
-            msg = "A maximum of 10 station ids can be requested at a time."
-            raise ValueError(msg)
-        result = self._deyecloud.post(API_PATH["station_latest"], json={"stationIds": ids})
-        if isinstance(station_ids, (int, str)):
-            return result[0] if isinstance(result, list) and result else result
-        return result
+        body = {"stationId": station_id}
+        data = self._deyecloud.request(method="POST", json=body, path=API_PATH["station_latest"])
+        if not isinstance(data, dict):
+            data = {}
+        return Station(self._deyecloud, _data={"station_id": station_id, **snake_case_keys(data)}, _fetched=True)
 
     def history(
         self,
