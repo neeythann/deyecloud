@@ -28,5 +28,9 @@ include = ["deyecloud*"]
 [tool.setuptools.package-data]
 deyecloud = ["deye.ini"]
 
+[tool.setuptools.data-files]
+# Ship the third-party notice with the installed package.
+"." = ["NOTICE"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

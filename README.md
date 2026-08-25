@@ -193,6 +193,16 @@ The layout intentionally mirrors PRAW:
   require a business-member token; configure `company_id` (from `deye.account.info()`)
   to obtain one.
 
+## License
+
+`deyecloud` is licensed under the GNU General Public License v3.0 or later (see
+[`LICENSE`](./LICENSE)).
+
+Portions of this software are derived from [PRAW](https://github.com/praw-dev/praw)
+(Copyright (c) 2016, Bryce Boe), which is licensed under the BSD 2-Clause License. The
+BSD copyright notice and the list of derived files are retained in the
+[`NOTICE`](./NOTICE) file, which is distributed with this package.
+
 ## Tests
 
 ```bash

@@ -1,4 +1,9 @@
-"""Contains functions dealing with snake case conversions."""
+"""Contains functions dealing with snake case conversions.
+
+This module is copied from PRAW (praw/util/snake.py), Copyright (c) 2016, Bryce Boe,
+licensed under the BSD 2-Clause License. See the NOTICE file for the full license text.
+
+"""
 
 from __future__ import annotations
 

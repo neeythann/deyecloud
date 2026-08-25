@@ -1,4 +1,11 @@
-"""Provide helper classes used by other models."""
+"""Provide helper classes used by other models.
+
+The :class:`.BoundedSet`, :class:`.ExponentialCounter`, and the
+:func:`.stream_generator` pattern are derived from PRAW (praw/models/util.py),
+Copyright (c) 2016, Bryce Boe, licensed under the BSD 2-Clause License. See the NOTICE
+file for the full license text.
+
+"""
 
 from __future__ import annotations
 
