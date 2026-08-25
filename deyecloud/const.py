@@ -2,7 +2,7 @@
 
 from deyecloud.endpoints import API_PATH  # ruff:ignore[unused-import]
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 # The code returned by the Deye Cloud API for a successful response.
 SUCCESS_CODE = "1000000"
