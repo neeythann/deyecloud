@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "deyecloud"
-version = "0.3.1"
+version = "0.3.2"
 description = "A Python wrapper for the Deye Cloud API, modeled after PRAW."
 readme = "README.md"
 license = { text = "GPL-3.0-or-later" }
